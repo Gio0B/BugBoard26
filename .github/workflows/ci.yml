@@ -1,0 +1,188 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bugboard26-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-checks:
+    name: Unit tests and frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Check backend syntax
+        run: npm --prefix backend run check
+
+      - name: Run backend unit tests
+        run: npm --prefix backend run test:unit
+
+      - name: Build frontend
+        run: npm --prefix frontend run build
+
+  application-and-junit:
+    name: Docker Compose and JUnit 5
+    if: github.event_name == 'workflow_dispatch'
+    needs: local-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      TEST_JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+      DEMO_ADMIN_EMAIL: admin@bugboard26.local
+      DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
+      DEMO_USER_EMAIL: user@bugboard26.local
+      DEMO_USER_PASSWORD: ${{ secrets.DEMO_USER_PASSWORD }}
+      ALLOW_TEST_DB_RESET: "true"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          for name in DATABASE_URL TEST_DATABASE_URL JWT_SECRET TEST_JWT_SECRET DEMO_ADMIN_PASSWORD DEMO_USER_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "Missing required GitHub Actions secret: ${name}" >&2
+              exit 1
+            fi
+          done
+          if [ "$DATABASE_URL" = "$TEST_DATABASE_URL" ]; then
+            echo "Application and test database URLs must be distinct." >&2
+            exit 1
+          fi
+
+      - name: Build application images
+        run: docker compose build backend frontend
+
+      - name: Run backend unit tests
+        run: docker compose run --rm --no-deps --entrypoint npm backend run test:unit
+
+      - name: Run JUnit integration suite
+        run: >-
+          docker compose --profile test up --build
+          --force-recreate
+          --abort-on-container-exit
+          --exit-code-from junit
+          junit
+
+      - name: Show service logs after failure
+        if: failure()
+        run: docker compose --profile test logs --no-color
+
+      - name: Clean up test containers
+        if: always()
+        run: docker compose --profile test down --volumes --remove-orphans
+
+  sonarqube:
+    name: SonarQube Community analysis
+    if: github.event_name == 'workflow_dispatch'
+    needs: local-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://unused:unused@localhost:5432/application
+      TEST_DATABASE_URL: postgresql://unused:unused@localhost:5432/test
+      JWT_SECRET: local-quality-secret-with-at-least-32-characters
+      TEST_JWT_SECRET: local-quality-test-secret-with-at-least-32-characters
+      DEMO_ADMIN_PASSWORD: local-quality-admin-password
+      DEMO_USER_PASSWORD: local-quality-user-password
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Generate backend coverage
+        run: |
+          npm --prefix backend ci
+          npm --prefix backend run test:coverage
+
+      - name: Start SonarQube
+        run: docker compose --profile quality up -d sonarqube
+
+      - name: Wait for SonarQube
+        shell: bash
+        run: |
+          for attempt in $(seq 1 90); do
+            status=$(curl --silent --fail http://localhost:9000/api/system/status | jq -r '.status' 2>/dev/null || true)
+            if [ "$status" = "UP" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose --profile quality logs --no-color sonarqube
+          exit 1
+
+      - name: Create temporary analysis token
+        id: sonar-token
+        shell: bash
+        run: |
+          token_name="bugboard26-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          response=$(curl --silent --fail --user admin:admin \
+            --request POST http://localhost:9000/api/user_tokens/generate \
+            --data-urlencode "name=${token_name}")
+          token=$(jq -r '.token' <<<"$response")
+          test -n "$token" && test "$token" != "null"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+          echo "name=$token_name" >> "$GITHUB_OUTPUT"
+
+      - name: Run Sonar scanner
+        env:
+          SONAR_TOKEN: ${{ steps.sonar-token.outputs.token }}
+        run: docker compose --profile quality run --rm sonar-scanner
+
+      - name: Revoke temporary analysis token
+        if: always() && steps.sonar-token.outputs.name != ''
+        env:
+          TOKEN_NAME: ${{ steps.sonar-token.outputs.name }}
+        shell: bash
+        run: >-
+          curl --silent --fail --user admin:admin
+          --request POST http://localhost:9000/api/user_tokens/revoke
+          --data-urlencode "name=${TOKEN_NAME}"
+
+      - name: Show SonarQube logs after failure
+        if: failure()
+        run: docker compose --profile quality logs --no-color sonarqube
+
+      - name: Clean up SonarQube
+        if: always()
+        run: docker compose --profile quality down --volumes --remove-orphans

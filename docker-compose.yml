@@ -1,0 +1,177 @@
+name: bugboard26
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@bugboard26.local}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:?DEMO_ADMIN_PASSWORD is required}
+      DEMO_USER_EMAIL: ${DEMO_USER_EMAIL:-user@bugboard26.local}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:?DEMO_USER_PASSWORD is required}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.js"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    init: true
+    restart: unless-stopped
+    networks:
+      - bugboard26-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:3000/api}
+    ports:
+      - "${FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    init: true
+    restart: unless-stopped
+    networks:
+      - bugboard26-net
+
+  test-db-reset:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    entrypoint: ["node", "scripts/reset-test-database.js"]
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: ${DATABASE_URL:-}
+      TEST_DATABASE_URL: ${TEST_DATABASE_URL:-}
+      ALLOW_TEST_DB_RESET: ${ALLOW_TEST_DB_RESET:-false}
+    restart: "no"
+    networks:
+      - bugboard26-net
+
+  backend-test:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: test
+      PORT: 3000
+      DATABASE_URL: ${TEST_DATABASE_URL:-}
+      JWT_SECRET: ${TEST_JWT_SECRET:-replace-with-a-long-test-secret-value}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      CORS_ORIGIN: http://frontend-test:8080
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@bugboard26.local}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-replace-with-a-strong-admin-password}
+      DEMO_USER_EMAIL: ${DEMO_USER_EMAIL:-user@bugboard26.local}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-replace-with-a-strong-user-password}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      test-db-reset:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.js"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    init: true
+    restart: "no"
+    networks:
+      - bugboard26-net
+
+  seed-idempotency-test:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    entrypoint: ["node", "scripts/verify-seed-idempotency.js"]
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: ${TEST_DATABASE_URL:?TEST_DATABASE_URL is required}
+      JWT_SECRET: ${TEST_JWT_SECRET:-replace-with-a-long-test-secret-value}
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@bugboard26.local}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-replace-with-a-strong-admin-password}
+      DEMO_USER_EMAIL: ${DEMO_USER_EMAIL:-user@bugboard26.local}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-replace-with-a-strong-user-password}
+    depends_on:
+      backend-test:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - bugboard26-net
+
+  junit:
+    profiles: ["test"]
+    build:
+      context: ./tests/junit
+      dockerfile: Dockerfile
+    environment:
+      TEST_API_BASE_URL: http://backend-test:3000/api
+      APPLICATION_DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required for the safety comparison}
+      TEST_DATABASE_URL: ${TEST_DATABASE_URL:?TEST_DATABASE_URL is required}
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@bugboard26.local}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-replace-with-a-strong-admin-password}
+      DEMO_USER_EMAIL: ${DEMO_USER_EMAIL:-user@bugboard26.local}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-replace-with-a-strong-user-password}
+    depends_on:
+      seed-idempotency-test:
+        condition: service_completed_successfully
+    restart: "no"
+    networks:
+      - bugboard26-net
+
+  sonarqube:
+    profiles: ["quality"]
+    image: sonarqube:26.10.0.133078-community
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    ports:
+      - "${SONAR_PORT:-9000}:9000"
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-logs:/opt/sonarqube/logs
+    networks:
+      - bugboard26-net
+
+  sonar-scanner:
+    profiles: ["quality"]
+    image: sonarsource/sonar-scanner-cli:12.2.0.4256_8.1.0
+    environment:
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_TOKEN: ${SONAR_TOKEN:-}
+    volumes:
+      - ./backend:/usr/src
+    depends_on:
+      - sonarqube
+    networks:
+      - bugboard26-net
+
+networks:
+  bugboard26-net:
+    name: bugboard26-net
+    driver: bridge
+
+volumes:
+  sonar-data:
+  sonar-logs:

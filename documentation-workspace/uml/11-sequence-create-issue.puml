@@ -1,0 +1,27 @@
+@startuml
+title Creazione issue — sequence diagram
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam sequenceArrowColor #465DFF
+actor Utente
+participant "React CreateIssuePage" as UI
+participant "Auth + Validator" as MW
+participant IssueController
+participant IssueService
+participant IssueRepository
+database "Neon PostgreSQL" as DB
+
+Utente -> UI : compila titolo, descrizione, tipo, priorità
+UI -> MW : POST /api/issues + Bearer JWT
+MW -> MW : verifica JWT e schema Zod
+MW -> IssueController : actor + DTO validato
+IssueController -> IssueService : createIssue(actor, input)
+IssueService -> IssueRepository : create(input, actor.id)
+IssueRepository -> DB : INSERT parametrizzata
+IssueRepository -> DB : SELECT issue + autore
+DB --> IssueRepository : riga persistita
+IssueRepository --> IssueService : Issue
+IssueService --> IssueController : IssueDTO
+IssueController --> UI : 201 Created
+UI --> Utente : dettaglio e conferma
+@enduml

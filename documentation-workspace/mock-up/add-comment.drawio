@@ -1,0 +1,18 @@
+<mxfile host="app.diagrams.net" modified="2026-07-16T12:10:00.000Z" agent="BugBoard26" version="26.0.0">
+  <diagram id="add-comment" name="Inserimento commento">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" value="BUG-1042" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDAD6;strokeColor=none;fontColor=#410002;fontSize=14;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="170" y="100" width="110" height="40" as="geometry"/></mxCell>
+        <mxCell id="3" value="Il login scade durante il salvataggio" style="text;html=1;align=left;verticalAlign=middle;fontSize=30;fontStyle=1;fontColor=#1A1B25;" vertex="1" parent="1"><mxGeometry x="170" y="150" width="720" height="70" as="geometry"/></mxCell>
+        <mxCell id="4" value="Descrizione dell'issue e metadati" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=22;fillColor=#F4F2FA;strokeColor=none;fontColor=#353641;fontSize=16;" vertex="1" parent="1"><mxGeometry x="170" y="240" width="760" height="160" as="geometry"/></mxCell>
+        <mxCell id="5" value="Massimo · 10:24&#xa;Il problema si presenta dopo circa 60 minuti." style="rounded=1;whiteSpace=wrap;html=1;align=left;spacing=18;fillColor=#EEF0FF;strokeColor=none;fontColor=#263A9B;fontSize=15;" vertex="1" parent="1"><mxGeometry x="170" y="430" width="760" height="86" as="geometry"/></mxCell>
+        <mxCell id="6" value="Giovanni · 10:41&#xa;Confermato anche su viewport mobile." style="rounded=1;whiteSpace=wrap;html=1;align=left;spacing=18;fillColor=#F4F2FA;strokeColor=none;fontColor=#353641;fontSize=15;" vertex="1" parent="1"><mxGeometry x="170" y="532" width="760" height="86" as="geometry"/></mxCell>
+        <mxCell id="7" value="Aggiungi un commento" style="text;html=1;align=left;fontSize=22;fontStyle=1;fontColor=#1A1B25;" vertex="1" parent="1"><mxGeometry x="980" y="240" width="300" height="45" as="geometry"/></mxCell>
+        <mxCell id="8" value="Scrivi un aggiornamento utile al team…" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=18;fillColor=#F4F2FA;strokeColor=#737684;fontColor=#737684;fontSize=15;" vertex="1" parent="1"><mxGeometry x="980" y="302" width="320" height="190" as="geometry"/></mxCell>
+        <mxCell id="9" value="Pubblica" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#465DFF;strokeColor=none;fontColor=#FFFFFF;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1160" y="514" width="140" height="52" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

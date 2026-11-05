@@ -1,0 +1,9 @@
+node_modules
+.scannerwork
+coverage
+lcov.info
+tmp
+test
+.env
+.env.*
+npm-debug.log*

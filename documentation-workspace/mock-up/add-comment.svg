@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Mock-up Material 3 per aggiungere un commento</title>
+  <desc id="desc">Dettaglio issue con discussione e pannello di composizione.</desc>
+  <defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#1b1b25" flood-opacity=".10"/></filter></defs>
+  <rect width="1440" height="900" fill="#f9f7ff"/>
+  <rect x="28" y="24" width="1384" height="76" rx="26" fill="#eceeff"/>
+  <circle cx="70" cy="62" r="22" fill="#465dff"/><path d="M78 51L66 62l12 11M67 62h16" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="110" y="69" font-family="Inter,Segoe UI,sans-serif" font-size="20" font-weight="750" fill="#1a1b25">Dettaglio issue</text>
+  <rect x="1240" y="42" width="138" height="40" rx="14" fill="#dce2ff"/><text x="1309" y="68" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="14" font-weight="700" fill="#263a9b">IN_PROGRESS</text>
+
+  <rect x="52" y="128" width="884" height="724" rx="30" fill="white" filter="url(#shadow)"/>
+  <rect x="92" y="170" width="96" height="38" rx="13" fill="#ffdad6"/><text x="140" y="195" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="13" font-weight="800" fill="#8c1d18">BUG</text>
+  <rect x="200" y="170" width="86" height="38" rx="13" fill="#ffdcc2"/><text x="243" y="195" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="13" font-weight="800" fill="#6b3712">HIGH</text>
+  <text x="92" y="258" font-family="Inter,Segoe UI,sans-serif" font-size="34" font-weight="760" fill="#1a1b25">Il login scade durante il salvataggio</text>
+  <text x="92" y="296" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#666875">Creata da Massimo · 12 agosto 2026, 09:42</text>
+  <rect x="92" y="328" width="804" height="116" rx="20" fill="#f5f3fb"/>
+  <text x="118" y="370" font-family="Inter,Segoe UI,sans-serif" font-size="16" fill="#353641">Dopo circa 60 minuti, il salvataggio restituisce 401.</text>
+  <text x="118" y="402" font-family="Inter,Segoe UI,sans-serif" font-size="16" fill="#353641">Il contenuto inserito deve restare disponibile dopo il nuovo login.</text>
+  <text x="92" y="492" font-family="Inter,Segoe UI,sans-serif" font-size="22" font-weight="750" fill="#1a1b25">Discussione</text>
+  <circle cx="116" cy="546" r="23" fill="#29334b"/><text x="116" y="552" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="14" font-weight="700" fill="white">M</text>
+  <text x="154" y="537" font-family="Inter,Segoe UI,sans-serif" font-size="15" font-weight="700" fill="#2f303b">Massimo</text>
+  <text x="154" y="560" font-family="Inter,Segoe UI,sans-serif" font-size="13" fill="#737684">10:24</text>
+  <rect x="154" y="580" width="700" height="68" rx="18" fill="#eef0ff"/>
+  <text x="178" y="621" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#263a9b">Il problema si presenta dopo circa 60 minuti.</text>
+  <circle cx="116" cy="704" r="23" fill="#6a4c93"/><text x="116" y="710" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="14" font-weight="700" fill="white">G</text>
+  <text x="154" y="695" font-family="Inter,Segoe UI,sans-serif" font-size="15" font-weight="700" fill="#2f303b">Giovanni</text>
+  <text x="154" y="718" font-family="Inter,Segoe UI,sans-serif" font-size="13" fill="#737684">10:41</text>
+  <rect x="154" y="738" width="700" height="68" rx="18" fill="#f5f3fb"/>
+  <text x="178" y="779" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#353641">Confermato anche su viewport mobile.</text>
+
+  <rect x="970" y="128" width="418" height="520" rx="30" fill="white" filter="url(#shadow)"/>
+  <text x="1010" y="184" font-family="Inter,Segoe UI,sans-serif" font-size="25" font-weight="760" fill="#1a1b25">Aggiungi un commento</text>
+  <text x="1010" y="218" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#666875">Condividi un aggiornamento utile al team.</text>
+  <rect x="1010" y="254" width="338" height="230" rx="20" fill="#f5f3fb" stroke="#777986"/>
+  <text x="1034" y="292" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#777986">Scrivi il commento…</text>
+  <text x="1010" y="516" font-family="Inter,Segoe UI,sans-serif" font-size="13" fill="#666875">Il testo sarà associato al tuo account.</text>
+  <rect x="1202" y="552" width="146" height="56" rx="19" fill="#465dff"/>
+  <path d="M1228 580h22M1242 570l10 10-10 10" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1290" y="586" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="15" font-weight="700" fill="white">Pubblica</text>
+  <rect x="970" y="674" width="418" height="178" rx="30" fill="#e3f7ef"/>
+  <text x="1010" y="726" font-family="Inter,Segoe UI,sans-serif" font-size="18" font-weight="750" fill="#153d32">Conversazione conservata</text>
+  <text x="1010" y="762" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#244b40">I commenti restano disponibili anche</text>
+  <text x="1010" y="788" font-family="Inter,Segoe UI,sans-serif" font-size="15" fill="#244b40">quando la issue viene archiviata.</text>
+</svg>

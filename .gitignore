@@ -1,0 +1,44 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# JavaScript
+node_modules/
+dist/
+build/
+coverage/
+.scannerwork/
+.sonar/
+backend/lcov.info
+.npm/
+tmp/
+**/tmp/
+
+# Java and Maven
+target/
+.mvn/timing.properties
+
+# IDE and operating system
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Runtime and generated artifacts
+*.log
+*.pid
+*.tmp
+*.bak
+.cache/
+documentation-workspace/generated/
+
+# Release archives are generated next to the repository
+BugBoard26.zip
+BugBoard26_*.zip
+
+# Keep docs limited to the final PDF
+docs/*
+!docs/BugBoard26.pdf
+.neon

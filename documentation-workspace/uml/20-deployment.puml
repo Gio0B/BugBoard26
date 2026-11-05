@@ -1,0 +1,40 @@
+@startuml
+title BugBoard26 — Componenti e deployment
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam componentStyle rectangle
+skinparam ArrowColor #465DFF
+
+actor "Browser" as Browser
+node "Docker host" {
+  node "frontend container\nNginx non-root :8080" as FE {
+    component "React + Tailwind\nMaterial Design 3" as React
+  }
+  node "backend container\nNode.js :3000" as BE {
+    component "Express REST API" as API
+    component "Migration + seed runner" as Init
+  }
+  node "profilo test" as Test {
+    component "JUnit 5 / Maven" as JUnit
+    component "DB reset guard" as Reset
+  }
+  node "profilo qualità" as Quality {
+    component "SonarQube" as Sonar
+    component "Sonar Scanner" as Scanner
+  }
+}
+cloud "Neon cloud" {
+  database "Database applicativo\nTLS" as ProdDB
+  database "Database/branch test\nTLS" as TestDB
+}
+
+Browser --> FE : HTTPS/HTTP
+React --> API : JSON REST + JWT
+API --> ProdDB : PostgreSQL cifrato
+Init --> ProdDB : migrazioni + seed idempotente
+JUnit --> API : HTTP reale
+Reset --> TestDB : reset schema con guardia
+API ..> TestDB : profilo test
+Scanner --> Sonar : report back-end
+Scanner ..> BE : analizza sorgenti
+@enduml

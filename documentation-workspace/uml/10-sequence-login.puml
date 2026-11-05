@@ -1,0 +1,32 @@
+@startuml
+title Login — sequence diagram
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam sequenceArrowColor #465DFF
+actor Utente
+participant "React LoginPage" as UI
+participant "POST /api/auth/login" as API
+participant AuthController
+participant AuthService
+participant UserRepository
+database "Neon PostgreSQL" as DB
+
+Utente -> UI : inserisce e-mail e password
+UI -> API : JSON credenziali
+API -> AuthController : input validato
+AuthController -> AuthService : login(credentials)
+AuthService -> UserRepository : findByEmail(email normalizzata)
+UserRepository -> DB : SELECT parametrizzata
+DB --> UserRepository : User + passwordHash
+UserRepository --> AuthService : User
+AuthService -> AuthService : bcrypt.compare()
+alt credenziali valide
+  AuthService -> AuthService : firma JWT con scadenza
+  AuthService --> AuthController : token + UserDTO
+  AuthController --> UI : 200 + sessione
+  UI --> Utente : apre la bacheca
+else credenziali non valide
+  AuthService --> UI : 401 uniforme
+  UI --> Utente : errore non rivelatore
+end
+@enduml

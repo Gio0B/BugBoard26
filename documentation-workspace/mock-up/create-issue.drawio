@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net" modified="2026-07-16T12:00:00.000Z" agent="BugBoard26" version="26.0.0">
+  <diagram id="create-issue" name="Creazione issue">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" value="BugBoard26" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#465DFF;fontColor=#FFFFFF;strokeColor=none;fontSize=20;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="24" y="24" width="180" height="56" as="geometry"/></mxCell>
+        <mxCell id="3" value="Nuova issue" style="text;html=1;align=left;verticalAlign=middle;fontSize=32;fontStyle=1;fontColor=#1A1B25;" vertex="1" parent="1"><mxGeometry x="250" y="92" width="300" height="60" as="geometry"/></mxCell>
+        <mxCell id="4" value="Titolo" style="rounded=1;whiteSpace=wrap;html=1;align=left;spacingLeft=18;fillColor=#F4F2FA;strokeColor=#737684;fontColor=#353641;fontSize=16;" vertex="1" parent="1"><mxGeometry x="250" y="180" width="720" height="64" as="geometry"/></mxCell>
+        <mxCell id="5" value="Descrizione" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingTop=18;spacingLeft=18;fillColor=#F4F2FA;strokeColor=#737684;fontColor=#353641;fontSize=16;" vertex="1" parent="1"><mxGeometry x="250" y="268" width="720" height="170" as="geometry"/></mxCell>
+        <mxCell id="6" value="Tipo: QUESTION · BUG · DOCUMENTATION · FEATURE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF0FF;strokeColor=#C4C9FF;fontColor=#263A9B;fontSize=15;" vertex="1" parent="1"><mxGeometry x="250" y="462" width="720" height="70" as="geometry"/></mxCell>
+        <mxCell id="7" value="Priorità: LOW · MEDIUM · HIGH · CRITICAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E7;strokeColor=#F0C8A5;fontColor=#633B18;fontSize=15;" vertex="1" parent="1"><mxGeometry x="250" y="552" width="720" height="64" as="geometry"/></mxCell>
+        <mxCell id="8" value="Prima di pubblicare&#xa;• Titolo specifico&#xa;• Passaggi e risultato atteso&#xa;• Nessun dato sensibile" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=22;fillColor=#E8F7F1;strokeColor=none;fontColor=#153D32;fontSize=16;" vertex="1" parent="1"><mxGeometry x="1010" y="180" width="330" height="250" as="geometry"/></mxCell>
+        <mxCell id="9" value="Annulla" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#465DFF;fontColor=#263A9B;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="690" y="660" width="120" height="52" as="geometry"/></mxCell>
+        <mxCell id="10" value="Crea issue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#465DFF;strokeColor=none;fontColor=#FFFFFF;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="830" y="660" width="140" height="52" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

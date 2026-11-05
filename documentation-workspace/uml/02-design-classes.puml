@@ -1,0 +1,61 @@
+@startuml
+title BugBoard26 — Class diagram di design
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam packageStyle rectangle
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #5264C8
+skinparam ArrowColor #5264C8
+
+package HTTP {
+  class AuthController
+  class UserController
+  class IssueController
+  class CommentController
+  class AuthenticationMiddleware
+  class AuthorizationMiddleware
+  class ValidationMiddleware
+  class ErrorHandler
+}
+package Application {
+  class AuthService
+  class UserService
+  class IssueService
+  class CommentService
+}
+package Domain {
+  class User
+  class Issue
+  class Comment
+}
+package Persistence {
+  class UserRepository
+  class IssueRepository
+  class CommentRepository
+  class PostgreSQLPool
+}
+
+AuthController --> AuthService
+UserController --> UserService
+IssueController --> IssueService
+CommentController --> CommentService
+AuthenticationMiddleware --> AuthService
+AuthService --> UserRepository
+UserService --> UserRepository
+IssueService --> IssueRepository
+CommentService --> CommentRepository
+CommentService --> IssueRepository
+UserRepository --> User
+IssueRepository --> Issue
+CommentRepository --> Comment
+UserRepository --> PostgreSQLPool
+IssueRepository --> PostgreSQLPool
+CommentRepository --> PostgreSQLPool
+ValidationMiddleware ..> AuthController
+ValidationMiddleware ..> UserController
+ValidationMiddleware ..> IssueController
+ValidationMiddleware ..> CommentController
+AuthorizationMiddleware ..> UserController
+AuthorizationMiddleware ..> IssueController
+ErrorHandler ..> HTTP : uniforma gli errori
+@enduml

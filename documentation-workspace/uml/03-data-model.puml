@@ -1,0 +1,50 @@
+@startuml
+title BugBoard26 — Modello dati Neon PostgreSQL
+hide methods
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor #F9F7FF
+skinparam classBorderColor #465DFF
+skinparam ArrowColor #465DFF
+
+entity users {
+  * id : UUID <<PK>>
+  --
+  * email : VARCHAR(320) <<UQ>>
+  * password_hash : VARCHAR(100)
+  * role : user_role
+  seed_key : VARCHAR(80) <<UQ>>
+  * created_at : TIMESTAMPTZ
+}
+entity issues {
+  * id : UUID <<PK>>
+  --
+  * author_id : UUID <<FK>>
+  * title : VARCHAR(160)
+  * description : TEXT
+  * type : issue_type
+  * priority : issue_priority
+  * status : issue_status
+  * archived : BOOLEAN
+  seed_key : VARCHAR(80) <<UQ>>
+  * created_at : TIMESTAMPTZ
+  * updated_at : TIMESTAMPTZ
+}
+entity comments {
+  * id : UUID <<PK>>
+  --
+  * issue_id : UUID <<FK>>
+  * author_id : UUID <<FK>>
+  * text : TEXT
+  seed_key : VARCHAR(80) <<UQ>>
+  * created_at : TIMESTAMPTZ
+}
+
+users ||--o{ issues : author_id
+users ||--o{ comments : author_id
+issues ||--o{ comments : issue_id
+note bottom of issues
+  Nessuna DELETE applicativa.
+  L'archiviazione imposta archived=true.
+end note
+@enduml

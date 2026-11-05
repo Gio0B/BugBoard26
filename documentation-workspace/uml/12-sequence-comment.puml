@@ -1,0 +1,30 @@
+@startuml
+title Aggiunta commento — sequence diagram
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam sequenceArrowColor #465DFF
+actor Utente
+participant "React IssueDetailPage" as UI
+participant CommentController
+participant CommentService
+participant IssueRepository
+participant CommentRepository
+database "Neon PostgreSQL" as DB
+
+Utente -> UI : scrive il commento
+UI -> CommentController : POST /issues/:id/comments
+CommentController -> CommentService : createComment(issueId, actor, text)
+CommentService -> IssueRepository : findById(issueId)
+IssueRepository -> DB : SELECT issue
+DB --> IssueRepository : issue
+alt issue attiva
+  CommentService -> CommentRepository : create(issueId, actor.id, text)
+  CommentRepository -> DB : INSERT + SELECT con autore
+  DB --> CommentRepository : commento persistito
+  CommentRepository --> UI : 201 CommentDTO
+  UI --> Utente : commento nella conversazione
+else issue archiviata
+  CommentService --> UI : 409 RESOURCE_CONFLICT
+  UI --> Utente : commenti in sola lettura
+end
+@enduml

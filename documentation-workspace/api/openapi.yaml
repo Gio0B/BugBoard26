@@ -1,0 +1,292 @@
+openapi: 3.1.0
+info:
+  title: BugBoard26 REST API
+  version: 1.0.0
+  description: API autenticata per utenti, issue con immagini facoltative, commenti e archiviazione logica.
+servers:
+  - url: http://localhost:3000
+tags:
+  - { name: System }
+  - { name: Authentication }
+  - { name: Users }
+  - { name: Issues }
+  - { name: Comments }
+paths:
+  /api/health:
+    get:
+      tags: [System]
+      summary: Verifica API e connessione PostgreSQL
+      responses:
+        "200": { description: Servizio disponibile }
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Autentica un utente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Login riuscito
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/AuthenticationError" }
+        "429": { description: Troppi tentativi }
+  /api/users:
+    post:
+      tags: [Users]
+      summary: Crea un utente (ADMIN)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        "201": { description: Utente creato }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/AuthenticationError" }
+        "403": { $ref: "#/components/responses/AuthorizationError" }
+        "409": { description: E-mail già registrata }
+  /api/issues:
+    get:
+      tags: [Issues]
+      summary: Elenca le issue non archiviate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Limit" }
+        - { $ref: "#/components/parameters/Type" }
+        - { $ref: "#/components/parameters/Status" }
+        - { $ref: "#/components/parameters/Priority" }
+        - { $ref: "#/components/parameters/SortBy" }
+        - { $ref: "#/components/parameters/Direction" }
+      responses:
+        "200":
+          description: Pagina di issue
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IssuePage" }
+        "401": { $ref: "#/components/responses/AuthenticationError" }
+    post:
+      tags: [Issues]
+      summary: Crea una issue
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: "#/components/schemas/CreateIssueRequest" }
+      responses:
+        "201": { description: Issue creata }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/AuthenticationError" }
+  /api/issues/archived:
+    get:
+      tags: [Issues]
+      summary: Elenca le issue archiviate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Limit" }
+        - { $ref: "#/components/parameters/Type" }
+        - { $ref: "#/components/parameters/Status" }
+        - { $ref: "#/components/parameters/Priority" }
+        - { $ref: "#/components/parameters/SortBy" }
+        - { $ref: "#/components/parameters/Direction" }
+      responses:
+        "200":
+          description: Pagina di issue archiviate
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IssuePage" }
+  /api/issues/{id}:
+    get:
+      tags: [Issues]
+      summary: Legge il dettaglio di una issue
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/IssueId" }]
+      responses:
+        "200": { description: Dettaglio issue }
+        "404": { description: Issue non trovata }
+  /api/issues/{id}/archive:
+    patch:
+      tags: [Issues]
+      summary: Archivia logicamente una issue (ADMIN)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/IssueId" }]
+      responses:
+        "200": { description: Issue archiviata }
+        "403": { $ref: "#/components/responses/AuthorizationError" }
+        "404": { description: Issue non trovata }
+  /api/issues/{id}/status:
+    patch:
+      tags: [Issues]
+      summary: Imposta una issue attiva come In corso
+      description: Disponibile a qualsiasi utente autenticato, indipendentemente dal ruolo.
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/IssueId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status: { type: string, const: IN_PROGRESS }
+      responses:
+        "200": { description: Issue impostata come In corso }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/AuthenticationError" }
+        "404": { description: Issue non trovata }
+        "409": { description: Issue archiviata }
+  /api/issues/{id}/images/{imageId}:
+    get:
+      tags: [Issues]
+      summary: Legge il contenuto binario di un’immagine allegata
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/IssueId" }
+        - { $ref: "#/components/parameters/ImageId" }
+      responses:
+        "200":
+          description: Immagine allegata
+          content:
+            image/jpeg: { schema: { type: string, format: binary } }
+            image/png: { schema: { type: string, format: binary } }
+            image/webp: { schema: { type: string, format: binary } }
+            image/gif: { schema: { type: string, format: binary } }
+        "401": { $ref: "#/components/responses/AuthenticationError" }
+        "404": { description: Immagine non trovata }
+  /api/issues/{id}/comments:
+    get:
+      tags: [Comments]
+      summary: Elenca i commenti della issue
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/IssueId" }
+        - { in: query, name: limit, schema: { type: integer, minimum: 1, maximum: 100, default: 100 } }
+      responses:
+        "200": { description: Commenti in ordine cronologico }
+    post:
+      tags: [Comments]
+      summary: Aggiunge un commento
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: "#/components/parameters/IssueId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [text]
+              properties: { text: { type: string, minLength: 1, maxLength: 5000 } }
+      responses:
+        "201": { description: Commento creato }
+        "409": { description: Issue archiviata }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    IssueId: { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+    ImageId: { in: path, name: imageId, required: true, schema: { type: string, format: uuid } }
+    Page: { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+    Limit: { in: query, name: limit, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+    Type: { in: query, name: type, schema: { $ref: "#/components/schemas/IssueType" } }
+    Status: { in: query, name: status, schema: { $ref: "#/components/schemas/IssueStatus" } }
+    Priority: { in: query, name: priority, schema: { $ref: "#/components/schemas/IssuePriority" } }
+    SortBy: { in: query, name: sortBy, schema: { type: string, enum: [createdAt, priority], default: createdAt } }
+    Direction: { in: query, name: direction, schema: { type: string, enum: [asc, desc], default: desc } }
+  responses:
+    ValidationError: { description: Dati non validi }
+    AuthenticationError: { description: Credenziali o token non validi }
+    AuthorizationError: { description: Ruolo insufficiente }
+    ServiceUnavailable: { description: Dipendenza temporaneamente non disponibile }
+  schemas:
+    Role: { type: string, enum: [ADMIN, USER] }
+    IssueType: { type: string, enum: [QUESTION, BUG, DOCUMENTATION, FEATURE] }
+    IssueStatus: { type: string, enum: [TODO, IN_PROGRESS, DONE] }
+    IssuePriority: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+    Author:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+    Issue:
+      type: object
+      required: [id, title, description, type, priority, status, archived, author, images, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, maxLength: 160 }
+        description: { type: string, maxLength: 10000 }
+        type: { $ref: "#/components/schemas/IssueType" }
+        priority: { $ref: "#/components/schemas/IssuePriority" }
+        status: { $ref: "#/components/schemas/IssueStatus" }
+        archived: { type: boolean }
+        author: { $ref: "#/components/schemas/Author" }
+        images: { type: array, maxItems: 5, items: { $ref: "#/components/schemas/IssueImage" } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    IssueImage:
+      type: object
+      required: [id, originalName, mimeType, sizeBytes, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        originalName: { type: string, minLength: 1, maxLength: 255 }
+        mimeType: { type: string, enum: [image/jpeg, image/png, image/webp, image/gif] }
+        sizeBytes: { type: integer, minimum: 1, maximum: 5242880 }
+        createdAt: { type: string, format: date-time }
+    IssuePage:
+      type: object
+      required: [items, page, limit, total, totalPages]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Issue" } }
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, maxLength: 320 }
+        password: { type: string, writeOnly: true, minLength: 1, maxLength: 72 }
+    LoginResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn, user]
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, const: Bearer }
+        expiresIn: { type: string, example: 1h }
+        user: { type: object }
+    CreateUserRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, role]
+      properties:
+        email: { type: string, format: email, maxLength: 320 }
+        password: { type: string, writeOnly: true, minLength: 12, maxLength: 72 }
+        role: { $ref: "#/components/schemas/Role" }
+    CreateIssueRequest:
+      type: object
+      additionalProperties: false
+      required: [title, description, type]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 160 }
+        description: { type: string, minLength: 1, maxLength: 10000 }
+        type: { $ref: "#/components/schemas/IssueType" }
+        priority: { $ref: "#/components/schemas/IssuePriority" }
+        images:
+          type: array
+          maxItems: 5
+          items: { type: string, format: binary }

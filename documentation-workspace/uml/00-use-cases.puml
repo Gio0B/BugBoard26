@@ -1,0 +1,39 @@
+@startuml
+title BugBoard26 — Casi d'uso
+left to right direction
+skinparam shadowing false
+skinparam roundcorner 14
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam ArrowColor #465DFF
+skinparam usecaseBackgroundColor #F4F2FA
+skinparam usecaseBorderColor #777783
+
+actor "Utente autenticato" as User
+actor "Amministratore" as Admin
+Admin --|> User
+
+rectangle BugBoard26 {
+  usecase "Effettuare il login" as UC1
+  usecase "Consultare issue attive" as UC2
+  usecase "Filtrare e ordinare" as UC3
+  usecase "Creare una issue" as UC4
+  usecase "Aprire il dettaglio" as UC5
+  usecase "Aggiungere un commento" as UC6
+  usecase "Consultare l'archivio" as UC7
+  usecase "Archiviare una issue" as UC8
+  usecase "Creare un utente" as UC9
+}
+
+User --> UC1
+User --> UC2
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+UC2 .> UC3 : <<include>>
+Admin --> UC8
+Admin --> UC9
+UC6 .> UC5 : <<extend>>
+UC8 .> UC5 : <<extend>>
+@enduml

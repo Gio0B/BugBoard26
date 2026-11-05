@@ -1,0 +1,29 @@
+@startuml
+title Archiviazione issue — sequence diagram
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam sequenceArrowColor #465DFF
+actor Amministratore
+participant "React IssueDetailPage" as UI
+participant "AuthenticationMiddleware" as AuthN
+participant "AuthorizationMiddleware" as AuthZ
+participant IssueController
+participant IssueService
+participant IssueRepository
+database "Neon PostgreSQL" as DB
+
+Amministratore -> UI : conferma archiviazione
+UI -> AuthN : PATCH /issues/:id/archive + JWT
+AuthN -> AuthZ : actor verificato
+alt ruolo ADMIN
+  AuthZ -> IssueController : richiesta autorizzata
+  IssueController -> IssueService : archiveIssue(id, actor)
+  IssueService -> IssueRepository : archive(id)
+  IssueRepository -> DB : UPDATE archived=TRUE
+  DB --> IssueRepository : issue aggiornata
+  IssueRepository --> UI : 200 IssueDTO
+  UI --> Amministratore : stato archiviato
+else ruolo USER
+  AuthZ --> UI : 403 FORBIDDEN
+end
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+title BugBoard26 — Class diagram di analisi
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam classBackgroundColor #F9F7FF
+skinparam classBorderColor #465DFF
+skinparam ArrowColor #465DFF
+
+class User <<entity>> {
+  id
+  email
+  passwordHash
+  role
+  createdAt
+}
+class Issue <<entity>> {
+  id
+  title
+  description
+  type
+  priority
+  status
+  archived
+  createdAt
+  updatedAt
+}
+class Comment <<entity>> {
+  id
+  text
+  createdAt
+}
+class Session <<concept>> {
+  accessToken
+  expiresAt
+}
+class IssueFilter <<value object>> {
+  type
+  priority
+  status
+  sortBy
+  direction
+}
+
+User "1" -- "0..*" Issue : crea >
+User "1" -- "0..*" Comment : scrive >
+Issue "1" *-- "0..*" Comment : conserva >
+User "1" -- "0..*" Session
+IssueFilter ..> Issue : seleziona
+note right of Issue
+  Un bug è una Issue con type=BUG:
+  stesso ciclo di vita, policy e persistenza.
+end note
+@enduml
